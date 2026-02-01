@@ -13,7 +13,7 @@ const cardVariants = {
     transition: {
       delay: i * 0.12,
       duration: 0.6,
-      ease: [0.34, 1.56, 0.64, 1],
+      ease: [0.34, 1.56, 0.64, 1] as const, // ← this fixes the TS error
     },
   }),
 };
@@ -63,10 +63,6 @@ export default function EthicsTrustSection() {
       className="py-20 md:py-24 px-4 md:px-6 relative overflow-hidden bg-cover bg-center bg-no-repeat"
       style={{
         backgroundImage: `url('https://thumbs.dreamstime.com/b/glowing-blue-shield-padlock-icon-signifies-digital-security-data-protection-illustrates-internet-safety-cyber-defense-network-393787346.jpg')`,
-        // Strong alternatives (swap if you prefer):
-        // 'https://thumbs.dreamstime.com/b/digital-security-concept-glowing-lock-icondigital-personal-data-circle-icon-surrounded-cyber-connections-373546382.jpg'  ← more network/connections feel
-        // 'https://www.shutterstock.com/image-vector/cyber-security-concept-digital-shield-600nw-2708951313.jpg'  ← cleaner vector shield
-        // 'https://thumbs.dreamstime.com/b/digital-lock-icon-over-dark-tech-background-symbolizing-information-security-data-protection-ideal-illustrating-cyber-378508716.jpg'  ← padlock focus
       }}
     >
       {/* Darker overlay tuned for this new image – keeps text crisp */}
@@ -151,15 +147,14 @@ export default function EthicsTrustSection() {
           className="text-center mt-16 md:mt-20"
         >
           <a href="/ethics" className="block cursor-pointer mx-auto w-max">
-
-          <motion.button
-            whileHover={{ scale: 1.06, y: -3 }}
-            whileTap={{ scale: 0.97 }}
-            className="bg-gradient-to-r from-[#FF6B9D] to-[#FF4D85] text-white px-10 py-5 rounded-2xl font-bold text-lg shadow-2xl shadow-[#FF6B9D]/50 hover:shadow-[#FF6B9D]/70 transition-all duration-300 flex items-center gap-3 mx-auto"
-          >
-            Read Our Full Ethics Framework
-            <Shield className="w-5 h-5" />
-          </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.06, y: -3 }}
+              whileTap={{ scale: 0.97 }}
+              className="bg-gradient-to-r from-[#FF6B9D] to-[#FF4D85] text-white px-10 py-5 rounded-2xl font-bold text-lg shadow-2xl shadow-[#FF6B9D]/50 hover:shadow-[#FF6B9D]/70 transition-all duration-300 flex items-center gap-3 mx-auto"
+            >
+              Read Our Full Ethics Framework
+              <Shield className="w-5 h-5" />
+            </motion.button>
           </a>
         </motion.div>
       </div>
