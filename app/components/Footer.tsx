@@ -1,6 +1,6 @@
 'use client';
 
-import { Brain, Mail, Phone, MapPin, Facebook, Twitter, Linkedin, Instagram, ArrowRight, Heart } from 'lucide-react';
+import { Brain, Mail, Phone, MapPin, Instagram, Youtube, ArrowRight, Heart } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const linkVariants = {
@@ -17,6 +17,13 @@ const fadeInUp = {
     y: 0,
   },
 };
+
+// TikTok icon component (since Lucide doesn't have it)
+const TikTokIcon = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
+  </svg>
+);
 
 export default function Footer() {
   return (
@@ -95,7 +102,7 @@ export default function Footer() {
                 <Brain className="w-11 h-11 text-[#00D9FF] group-hover:text-[#FF6B9D] transition-colors duration-300" />
                 <div className="absolute -inset-2 bg-[#00D9FF] opacity-20 rounded-full blur-lg group-hover:bg-[#FF6B9D] transition-colors" />
               </div>
-              <span className="text-3xl font-serif font-bold">MindCare</span>
+              <span className="text-3xl font-serif font-bold">SentinelMind</span>
             </div>
 
             <p className="text-gray-400 mb-8 leading-relaxed text-sm">
@@ -105,14 +112,15 @@ export default function Footer() {
             {/* Social icons - improved design */}
             <div className="flex gap-3">
               {[
-                { Icon: Facebook, color: '#00D9FF', label: 'Facebook' },
-                { Icon: Twitter, color: '#FF6B9D', label: 'Twitter' },
-                { Icon: Linkedin, color: '#00FF88', label: 'LinkedIn' },
-                { Icon: Instagram, color: '#FFC700', label: 'Instagram' },
-              ].map(({ Icon, color, label }, idx) => (
+                { Icon: TikTokIcon, color: '#00D9FF', label: 'TikTok', link: 'https://www.tiktok.com/@empower_echoes?_r=1&_t=ZN-93JVWpUfS3q' },
+                { Icon: Instagram, color: '#FF6B9D', label: 'Instagram', link: 'https://www.instagram.com/empower_echoes1924?igsh=MXdkMTk3eHZ4aWMzbQ==' },
+                { Icon: Youtube, color: '#FFC700', label: 'YouTube', link: 'https://www.youtube.com/@Empower-echoes1924' },
+              ].map(({ Icon, color, label, link }, idx) => (
                 <motion.a
                   key={idx}
-                  href="#"
+                  href={link}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   aria-label={label}
                   whileHover={{ scale: 1.15, y: -3 }}
                   whileTap={{ scale: 0.95 }}
@@ -201,8 +209,8 @@ export default function Footer() {
                 </div>
                 <div>
                   <p className="text-xs text-gray-500 mb-0.5">Email us</p>
-                  <a href="mailto:hello@mindcare.com" className="hover:text-white transition-colors text-sm">
-                    hello@mindcare.com
+                  <a href="mailto:abigail@infosentinelmind.co.uk" className="hover:text-white transition-colors text-sm">
+                    abigail@infosentinelmind.co.uk
                   </a>
                 </div>
               </li>
@@ -213,8 +221,8 @@ export default function Footer() {
                 </div>
                 <div>
                   <p className="text-xs text-gray-500 mb-0.5">Call us</p>
-                  <a href="tel:+15551234567" className="hover:text-white transition-colors text-sm">
-                    +1 (555) 123-4567
+                  <a href="tel:+77512096532" className="hover:text-white transition-colors text-sm">
+                     +77512096532
                   </a>
                 </div>
               </li>
@@ -225,7 +233,7 @@ export default function Footer() {
                 </div>
                 <div>
                   <p className="text-xs text-gray-500 mb-0.5">Location</p>
-                  <span className="text-sm">San Francisco, CA</span>
+                  <span className="text-sm">Nigeria</span>
                 </div>
               </li>
             </ul>
@@ -236,7 +244,7 @@ export default function Footer() {
         <div className="pt-10 border-t-2 border-white/10">
           <div className="flex flex-col md:flex-row justify-between items-center gap-6 text-center md:text-left mb-6">
             <p className="text-gray-400 text-sm">
-              © {new Date().getFullYear()} MindCare Platform. All rights reserved.
+              © {new Date().getFullYear()} Sentinel Mind. All rights reserved.
             </p>
 
             <div className="flex flex-wrap justify-center gap-8 text-sm">

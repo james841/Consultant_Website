@@ -67,15 +67,15 @@ const fadeInUp = {
 export default function CoachSection() {
   const stats = [
     { icon: Users, value: "600+", label: "Clients Served", color: "#00D9FF" },
-    { icon: Briefcase, value: "30+", label: "Organizations", color: "#FF6B9D" },
-    { icon: Award, value: "120+", label: "Workshops", color: "#00FF88" },
+    { icon: Briefcase, value: "5+", label: "Organizations", color: "#FF6B9D" },
+    { icon: Award, value: "40+", label: "Workshops", color: "#00FF88" },
   ];
 
   const highlights = [
     "Licensed Mental Health Professional",
-    "Doctorate in Community Psychology",
+    "Specialized in Community Psychology",
     "Evidence-Based Approaches",
-    "Ethical AI Integration",
+    "Ethical AI Integration in Wellness",
   ];
 
   return (
@@ -120,7 +120,7 @@ export default function CoachSection() {
             <div className="absolute -top-6 -left-6 w-28 h-28 bg-[#FFC700] rounded-3xl rotate-12 opacity-90 shadow-2xl -z-10"></div>
             <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-[#00D9FF] rounded-full opacity-90 shadow-2xl -z-10"></div>
 
-            {/* Floating credential badges */}
+            {/* Floating credential badges – updated */}
             <motion.div
               initial={{ opacity: 0, scale: 0.8, y: 20 }}
               whileInView={{ opacity: 1, scale: 1, y: 0 }}
@@ -151,8 +151,8 @@ export default function CoachSection() {
                   <BookOpen className="w-7 h-7" />
                 </div>
                 <div>
-                  <div className="text-xs opacity-70 mb-0.5">Academic</div>
-                  <div className="text-sm font-bold leading-tight">Doctorate in Psychology</div>
+                  <div className="text-xs opacity-70 mb-0.5">Background</div>
+                  <div className="text-sm font-bold leading-tight">Community Psychology Specialist</div>
                 </div>
               </div>
             </motion.div>
@@ -191,37 +191,26 @@ export default function CoachSection() {
             </span>
           </h2>
 
-          {/* Description */}
+          {/* Description – updated to remove doctorate implication */}
           <div className="space-y-5">
             <p className="text-lg md:text-xl text-gray-700 leading-relaxed">
               Abigail Ajayi is a{" "}
               <span className="font-bold text-[#0A3D4A]">
-                mental health professional
+                licensed mental health professional
               </span>{" "}
-              with a background in{" "}
+              with extensive experience in{" "}
               <span className="font-bold text-[#0A3D4A]">
                 community psychology
               </span>{" "}
-              and clinical practice. Her work combines evidence-based approaches
-              with deep empathy, helping individuals and communities move beyond
-              survival toward sustainable wellbeing through{" "}
-              <span className="text-[#00D9FF] font-bold">ethical</span>,
-              AI-informed insights and human-centered care.
+              and client-centered practice. I combines evidence-based methods with genuine empathy, supporting individuals and groups to move from survival to thriving through compassionate, ethical care including thoughtful integration of AI-informed insights.
             </p>
 
             <p className="text-lg md:text-xl text-gray-700 leading-relaxed">
-              Whether you&apos;re seeking personal support, organizational
-              training, or research collaboration, I bring{" "}
-              <span className="font-bold text-[#FF6B9D]">academic rigor</span>{" "}
-              and{" "}
-              <span className="font-bold text-[#FF6B9D]">
-                genuine compassion
-              </span>{" "}
-              to every engagement.
+              With hundreds of clients supported, dozens of workshops delivered, and collaborations across organizations, I brings proven experience and heartfelt dedication to personal coaching, workplace wellbeing, and community mental health initiatives.
             </p>
           </div>
 
-          {/* Highlights */}
+          {/* Highlights – updated */}
           <motion.div
             initial="hidden"
             whileInView="visible"
@@ -263,7 +252,7 @@ export default function CoachSection() {
             </motion.button>
           </a>
 
-          {/* Stats Grid */}
+          {/* Stats Grid – updated values */}
           <div className="grid grid-cols-3 gap-6 pt-6">
             {stats.map((stat, index) => (
               <motion.div
@@ -313,7 +302,7 @@ export default function CoachSection() {
             <div className="flex items-center gap-2 bg-white px-5 py-3 rounded-full border-2 border-[#FF6B9D]/30 shadow-md hover:shadow-lg hover:border-[#FF6B9D] transition-all duration-300 group">
               <Award className="w-4 h-4 text-[#FF6B9D] group-hover:scale-110 transition-transform" />
               <span className="text-sm font-semibold text-gray-700 group-hover:text-[#0A3D4A] transition-colors">
-                Board Certified
+                Experienced Facilitator
               </span>
             </div>
           </div>
