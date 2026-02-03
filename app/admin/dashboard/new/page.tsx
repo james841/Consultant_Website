@@ -1,6 +1,6 @@
-'use client';
-
-import React, { useState } from 'react';
+{/*'use client'; 
+    
+    import React, { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
@@ -136,7 +136,7 @@ export default function NewPost() {
 
       <div className="min-h-screen p-4 md:p-8">
         <div className="max-w-5xl mx-auto">
-          {/* Header */}
+     
           <div className="flex items-center justify-between mb-8">
             <Link href="/admin/dashboard">
               <button className="flex items-center gap-2 text-white hover:text-purple-300 transition-colors">
@@ -170,9 +170,8 @@ export default function NewPost() {
             </div>
           </div>
 
-          {/* Form */}
           <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 border border-white/20 space-y-6">
-            {/* Title */}
+         
             <div>
               <label className="block text-white font-bold mb-2">Title *</label>
               <input
@@ -184,7 +183,6 @@ export default function NewPost() {
               />
             </div>
 
-            {/* Slug */}
             <div>
               <label className="block text-white font-bold mb-2">URL Slug</label>
               <input
@@ -199,7 +197,7 @@ export default function NewPost() {
               </p>
             </div>
 
-            {/* Excerpt */}
+        
             <div>
               <label className="block text-white font-bold mb-2">Excerpt *</label>
               <textarea
@@ -215,7 +213,6 @@ export default function NewPost() {
               </p>
             </div>
 
-            {/* Category & Tags */}
             <div className="grid md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-white font-bold mb-2">Category</label>
@@ -245,7 +242,7 @@ export default function NewPost() {
               </div>
             </div>
 
-            {/* Cover Image */}
+       
             <div>
               <label className="block text-white font-bold mb-2">Cover Image</label>
 
@@ -281,7 +278,7 @@ export default function NewPost() {
               )}
             </div>
 
-            {/* Content Editor */}
+       
             <div>
               <label className="block text-white font-bold mb-2">Content *</label>
               <RichTextEditor
@@ -295,3 +292,4 @@ export default function NewPost() {
     </>
   );
 }
+*/}
