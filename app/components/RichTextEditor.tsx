@@ -2,7 +2,7 @@
 
 import React from 'react';
 import dynamic from 'next/dynamic';
-import 'react-quill/dist/quill.snow.css';
+import 'react-quill-new/dist/quill.snow.css';  // ← Correct path for react-quill-new
 
 const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false });
 
