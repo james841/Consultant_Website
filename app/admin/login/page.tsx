@@ -1,10 +1,19 @@
 'use client';
 
+// ✅ Prevents prerendering at build time
+export const dynamic = 'force-dynamic';
+
 import React, { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@supabase/supabase-js';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Shield, Mail, AlertCircle } from 'lucide-react';
+
+// ✅ Direct createClient — avoids SSR crash during Vercel build
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 export default function AdminLogin() {
   const router = useRouter();
@@ -13,9 +22,9 @@ export default function AdminLogin() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    // Check if already logged in
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user?.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL) {
+    // ✅ FIXED: Use getUser() instead of getSession()
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user?.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL) {
         router.push('/admin/dashboard');
       }
     });
@@ -50,7 +59,6 @@ export default function AdminLogin() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          // FIXED: Changed from /admin/dashboard to /auth/callback
           redirectTo: `${window.location.origin}/auth/callback`,
           queryParams: {
             access_type: 'offline',
@@ -80,7 +88,7 @@ export default function AdminLogin() {
             <Shield className="w-10 h-10 text-white" />
           </div>
           <h1 className="text-4xl font-bold text-white mb-2">Admin Portal</h1>
-          <p className="text-gray-400">MindCare Blog Management</p>
+          <p className="text-gray-400">Blog Management</p>
         </div>
 
         {/* Login Card */}
@@ -103,7 +111,7 @@ export default function AdminLogin() {
             className="w-full bg-white hover:bg-gray-100 text-gray-900 font-bold py-4 px-6 rounded-xl transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? (
-              <div className="w-6 h-6 border-3 border-gray-900 border-t-transparent rounded-full animate-spin" />
+              <div className="w-6 h-6 border-2 border-gray-900 border-t-transparent rounded-full animate-spin" />
             ) : (
               <>
                 <Mail className="w-5 h-5" />
@@ -119,7 +127,6 @@ export default function AdminLogin() {
           </div>
         </div>
 
-        {/* Footer */}
         <p className="text-center text-gray-500 text-sm mt-8">
           Protected by Google OAuth 2.0
         </p>
