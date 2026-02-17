@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
@@ -13,11 +13,16 @@ import {
   Plus,
   FileText,
   TrendingUp,
-  Users,
   Calendar,
 } from 'lucide-react';
 import Link from 'next/link';
 import type { BlogPost } from '@/lib/supabase';
+
+// ✅ Use createClient directly — avoids SSR crash during Vercel build
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -36,11 +41,10 @@ export default function AdminDashboard() {
   }, []);
 
   const checkAuth = async () => {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    if (session?.user?.email) {
-      setUserEmail(session.user.email);
+    // ✅ FIXED: Use getUser() instead of getSession() — more secure
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user?.email) {
+      setUserEmail(user.email);
     }
   };
 
@@ -95,15 +99,13 @@ export default function AdminDashboard() {
           </div>
 
           <div className="flex gap-3">
-            <Link href="/admin/dashboard/new">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-purple-500/50"
-              >
-                <Plus className="w-5 h-5" />
-                New Post
-              </motion.button>
+            {/* ✅ FIXED: Link directly, no nested button */}
+            <Link
+              href="/admin/dashboard/new"
+              className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-purple-500/50 hover:opacity-90 transition-opacity"
+            >
+              <Plus className="w-5 h-5" />
+              New Post
             </Link>
 
             <button
@@ -157,10 +159,12 @@ export default function AdminDashboard() {
             <div className="p-12 text-center">
               <PenSquare className="w-16 h-16 text-gray-500 mx-auto mb-4" />
               <p className="text-gray-400 text-lg mb-4">No blog posts yet</p>
-              <Link href="/admin/dashboard/new">
-                <button className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-xl font-bold">
-                  Create Your First Post
-                </button>
+              {/* ✅ FIXED: Link directly, no nested button */}
+              <Link
+                href="/admin/dashboard/new"
+                className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-xl font-bold inline-block hover:opacity-90 transition-opacity"
+              >
+                Create Your First Post
               </Link>
             </div>
           ) : (
@@ -200,18 +204,22 @@ export default function AdminDashboard() {
                     </div>
 
                     <div className="flex gap-2">
+                      {/* ✅ FIXED: All Link+button combos replaced with styled Links */}
                       {post.published && (
-                        <Link href={`/blog/${post.slug}`} target="_blank">
-                          <button className="p-3 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-xl transition-all">
-                            <Eye className="w-5 h-5" />
-                          </button>
+                        <Link
+                          href={`/blog/${post.slug}`}
+                          target="_blank"
+                          className="p-3 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-xl transition-all"
+                        >
+                          <Eye className="w-5 h-5" />
                         </Link>
                       )}
 
-                      <Link href={`/admin/dashboard/edit/${post.id}`}>
-                        <button className="p-3 bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 rounded-xl transition-all">
-                          <Edit className="w-5 h-5" />
-                        </button>
+                      <Link
+                        href={`/admin/dashboard/edit/${post.id}`}
+                        className="p-3 bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 rounded-xl transition-all"
+                      >
+                        <Edit className="w-5 h-5" />
                       </Link>
 
                       <button

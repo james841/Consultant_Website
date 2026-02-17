@@ -1,13 +1,31 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Save, Eye, Upload, X, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import toast from 'react-hot-toast';
-import { Toaster } from 'react-hot-toast';
-import RichTextEditor from '@/app/components/RichTextEditor';
+import toast, { Toaster } from 'react-hot-toast';
+import dynamic from 'next/dynamic';
+
+// ✅ Use createClient directly — avoids SSR crash during Vercel build
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
+
+// ✅ SSR disabled — rich text editors use browser APIs unavailable at build time
+const RichTextEditor = dynamic(
+  () => import('@/app/components/RichTextEditor'),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-64 bg-white/10 border border-white/20 rounded-xl animate-pulse flex items-center justify-center">
+        <p className="text-gray-400 text-sm">Loading editor...</p>
+      </div>
+    ),
+  }
+);
 
 export default function EditPost({ params }: { params: { id: string } }) {
   const router = useRouter();
@@ -93,19 +111,16 @@ export default function EditPost({ params }: { params: { id: string } }) {
     setImageUploading(true);
 
     const reader = new FileReader();
-
     reader.onloadend = () => {
       const base64String = reader.result as string;
       setFormData((prev) => ({ ...prev, cover_image: base64String }));
       setImageUploading(false);
       toast.success('Image loaded successfully!');
     };
-
     reader.onerror = () => {
       toast.error('Failed to load image');
       setImageUploading(false);
     };
-
     reader.readAsDataURL(file);
   };
 
@@ -118,6 +133,15 @@ export default function EditPost({ params }: { params: { id: string } }) {
     setSaving(true);
 
     try {
+      // ✅ FIXED: Use getUser() instead of getSession()
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+      if (userError || !user) {
+        toast.error('You must be logged in to edit a post');
+        router.push('/admin/login');
+        return;
+      }
+
       const tagsArray = formData.tags
         .split(',')
         .map((tag) => tag.trim())
@@ -140,7 +164,6 @@ export default function EditPost({ params }: { params: { id: string } }) {
       if (error) throw error;
 
       toast.success(publish ? 'Post published!' : 'Changes saved!');
-      // FIXED: Use router.push directly without setTimeout
       router.push('/admin/dashboard');
     } catch (error) {
       toast.error('Failed to save changes');
@@ -166,11 +189,13 @@ export default function EditPost({ params }: { params: { id: string } }) {
         <div className="max-w-5xl mx-auto">
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
-            <Link href="/admin/dashboard">
-              <button className="flex items-center gap-2 text-white hover:text-purple-300 transition-colors">
-                <ArrowLeft className="w-5 h-5" />
-                Back to Dashboard
-              </button>
+            {/* ✅ FIXED: Link directly, no nested button */}
+            <Link
+              href="/admin/dashboard"
+              className="flex items-center gap-2 text-white hover:text-purple-300 transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              Back to Dashboard
             </Link>
 
             <div className="flex gap-3">
@@ -200,7 +225,6 @@ export default function EditPost({ params }: { params: { id: string } }) {
 
           {/* Form */}
           <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 border border-white/20 space-y-6">
-            {/* Title */}
             <div>
               <label className="block text-white font-bold mb-2">Title *</label>
               <input
@@ -212,7 +236,6 @@ export default function EditPost({ params }: { params: { id: string } }) {
               />
             </div>
 
-            {/* Slug */}
             <div>
               <label className="block text-white font-bold mb-2">URL Slug</label>
               <input
@@ -227,7 +250,6 @@ export default function EditPost({ params }: { params: { id: string } }) {
               </p>
             </div>
 
-            {/* Excerpt */}
             <div>
               <label className="block text-white font-bold mb-2">Excerpt *</label>
               <textarea
@@ -238,12 +260,9 @@ export default function EditPost({ params }: { params: { id: string } }) {
                 rows={3}
                 className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 transition-all resize-none"
               />
-              <p className="text-gray-400 text-sm mt-1">
-                {formData.excerpt.length}/200 characters
-              </p>
+              <p className="text-gray-400 text-sm mt-1">{formData.excerpt.length}/200 characters</p>
             </div>
 
-            {/* Category & Tags */}
             <div className="grid md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-white font-bold mb-2">Category</label>
@@ -273,7 +292,6 @@ export default function EditPost({ params }: { params: { id: string } }) {
               </div>
             </div>
 
-            {/* Cover Image */}
             <div>
               <label className="block text-white font-bold mb-2">
                 Cover Image
@@ -282,6 +300,7 @@ export default function EditPost({ params }: { params: { id: string } }) {
 
               {formData.cover_image ? (
                 <div className="relative">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={formData.cover_image}
                     alt="Cover"
@@ -297,22 +316,13 @@ export default function EditPost({ params }: { params: { id: string } }) {
               ) : (
                 <label className="block w-full px-4 py-8 bg-white/10 border-2 border-dashed border-white/20 rounded-xl text-center cursor-pointer hover:border-purple-500 transition-all">
                   <Upload className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                  <p className="text-white mb-1">
-                    {imageUploading ? 'Loading image...' : 'Click to upload cover image'}
-                  </p>
+                  <p className="text-white mb-1">{imageUploading ? 'Loading image...' : 'Click to upload cover image'}</p>
                   <p className="text-gray-400 text-sm">PNG, JPG up to 2MB</p>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="hidden"
-                    disabled={imageUploading}
-                  />
+                  <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" disabled={imageUploading} />
                 </label>
               )}
             </div>
 
-            {/* Content Editor */}
             <div>
               <label className="block text-white font-bold mb-2">Content *</label>
               <RichTextEditor

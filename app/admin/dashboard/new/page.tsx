@@ -8,15 +8,13 @@ import Link from 'next/link';
 import toast, { Toaster } from 'react-hot-toast';
 import dynamic from 'next/dynamic';
 
-// ✅ Plain supabase-js createClient — safe for both server and client.
-// Do NOT import from @/lib/supabase here — createBrowserClient crashes
-// during Next.js build when the module graph is evaluated server-side.
+// ✅ Use createClient directly — avoids SSR crash during Vercel build
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-// ✅ SSR disabled — rich text editors use browser APIs unavailable at build time.
+// ✅ SSR disabled — rich text editors use browser APIs unavailable at build time
 const RichTextEditor = dynamic(
   () => import('@/app/components/RichTextEditor'),
   {
@@ -77,19 +75,16 @@ export default function NewPost() {
     setImageUploading(true);
 
     const reader = new FileReader();
-
     reader.onloadend = () => {
       const base64String = reader.result as string;
       setFormData((prev) => ({ ...prev, cover_image: base64String }));
       setImageUploading(false);
       toast.success('Image loaded successfully!');
     };
-
     reader.onerror = () => {
       toast.error('Failed to load image');
       setImageUploading(false);
     };
-
     reader.readAsDataURL(file);
   };
 
@@ -182,7 +177,6 @@ export default function NewPost() {
 
           {/* Form */}
           <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 border border-white/20 space-y-6">
-            {/* Title */}
             <div>
               <label className="block text-white font-bold mb-2">Title *</label>
               <input
@@ -194,7 +188,6 @@ export default function NewPost() {
               />
             </div>
 
-            {/* Slug */}
             <div>
               <label className="block text-white font-bold mb-2">URL Slug</label>
               <input
@@ -209,7 +202,6 @@ export default function NewPost() {
               </p>
             </div>
 
-            {/* Excerpt */}
             <div>
               <label className="block text-white font-bold mb-2">Excerpt *</label>
               <textarea
@@ -225,7 +217,6 @@ export default function NewPost() {
               </p>
             </div>
 
-            {/* Category & Tags */}
             <div className="grid md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-white font-bold mb-2">Category</label>
@@ -255,7 +246,6 @@ export default function NewPost() {
               </div>
             </div>
 
-            {/* Cover Image */}
             <div>
               <label className="block text-white font-bold mb-2">
                 Cover Image
@@ -295,7 +285,6 @@ export default function NewPost() {
               )}
             </div>
 
-            {/* Content Editor */}
             <div>
               <label className="block text-white font-bold mb-2">Content *</label>
               <RichTextEditor
