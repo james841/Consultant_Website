@@ -1,34 +1,38 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, use } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Save, Eye, Upload, X, Loader2 } from 'lucide-react';
+import { ArrowLeft, Save, Send, Upload, X, Loader2, EyeOff, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import toast, { Toaster } from 'react-hot-toast';
 import dynamic from 'next/dynamic';
 
-// ✅ Use createClient directly — avoids SSR crash during Vercel build
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-// ✅ SSR disabled — rich text editors use browser APIs unavailable at build time
 const RichTextEditor = dynamic(
   () => import('@/app/components/RichTextEditor'),
   {
     ssr: false,
     loading: () => (
-      <div className="w-full h-64 bg-white/10 border border-white/20 rounded-xl animate-pulse flex items-center justify-center">
-        <p className="text-gray-400 text-sm">Loading editor...</p>
+      <div className="w-full h-80 bg-white/[0.02] border border-white/10 rounded-2xl animate-pulse flex flex-col items-center justify-center gap-3">
+        <div className="w-10 h-10 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
+        <p className="text-slate-500 text-sm font-medium">Loading content...</p>
       </div>
     ),
   }
 );
 
-export default function EditPost({ params }: { params: { id: string } }) {
+export default function EditPost({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
+  
+  // ✅ Next.js 15 Fix: Unwrap params promise
+  const resolvedParams = use(params);
+  const postId = resolvedParams.id;
+
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [imageUploading, setImageUploading] = useState(false);
@@ -54,14 +58,14 @@ export default function EditPost({ params }: { params: { id: string } }) {
 
   useEffect(() => {
     fetchPost();
-  }, [params.id]);
+  }, [postId]);
 
   const fetchPost = async () => {
     try {
       const { data, error } = await supabase
         .from('blog_posts')
         .select('*')
-        .eq('id', params.id)
+        .eq('id', postId)
         .single();
 
       if (error) throw error;
@@ -79,8 +83,7 @@ export default function EditPost({ params }: { params: { id: string } }) {
         });
       }
     } catch (error) {
-      console.error('Error fetching post:', error);
-      toast.error('Failed to load post');
+      toast.error('Post not found');
       router.push('/admin/dashboard');
     } finally {
       setLoading(false);
@@ -101,73 +104,50 @@ export default function EditPost({ params }: { params: { id: string } }) {
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (file.size > 2 * 1024 * 1024) {
-      toast.error('Image must be less than 2MB');
+    if (!file || file.size > 2 * 1024 * 1024) {
+      toast.error(file ? 'Image must be < 2MB' : 'Upload failed');
       return;
     }
 
     setImageUploading(true);
-
     const reader = new FileReader();
     reader.onloadend = () => {
-      const base64String = reader.result as string;
-      setFormData((prev) => ({ ...prev, cover_image: base64String }));
+      setFormData((prev) => ({ ...prev, cover_image: reader.result as string }));
       setImageUploading(false);
-      toast.success('Image loaded successfully!');
-    };
-    reader.onerror = () => {
-      toast.error('Failed to load image');
-      setImageUploading(false);
+      toast.success('Cover updated');
     };
     reader.readAsDataURL(file);
   };
 
-  const handleSubmit = async (publish: boolean) => {
+  const handleSubmit = async (publishStatus: boolean) => {
     if (!formData.title || !formData.excerpt || !formData.content) {
-      toast.error('Please fill in all required fields');
+      toast.error('Required fields missing');
       return;
     }
 
     setSaving(true);
-
     try {
-      // ✅ FIXED: Use getUser() instead of getSession()
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-
-      if (userError || !user) {
-        toast.error('You must be logged in to edit a post');
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
         router.push('/admin/login');
         return;
       }
 
-      const tagsArray = formData.tags
-        .split(',')
-        .map((tag) => tag.trim())
-        .filter(Boolean);
-
       const { error } = await supabase
         .from('blog_posts')
         .update({
-          title: formData.title,
-          slug: formData.slug,
-          excerpt: formData.excerpt,
-          content: formData.content,
-          category: formData.category,
-          tags: tagsArray,
-          cover_image: formData.cover_image,
-          published: publish,
+          ...formData,
+          tags: formData.tags.split(',').map(t => t.trim()).filter(Boolean),
+          published: publishStatus,
         })
-        .eq('id', params.id);
+        .eq('id', postId);
 
       if (error) throw error;
 
-      toast.success(publish ? 'Post published!' : 'Changes saved!');
+      toast.success('Changes synced successfully');
       router.push('/admin/dashboard');
     } catch (error) {
-      toast.error('Failed to save changes');
-      console.error('Error:', error);
+      toast.error('Sync failed');
     } finally {
       setSaving(false);
     }
@@ -175,164 +155,147 @@ export default function EditPost({ params }: { params: { id: string } }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="w-12 h-12 text-purple-500 animate-spin" />
+      <div className="min-h-screen bg-[#09090b] flex flex-col items-center justify-center gap-4">
+        <Loader2 className="w-10 h-10 text-indigo-500 animate-spin" />
+        <p className="text-slate-500 font-medium animate-pulse">Fetching Article...</p>
       </div>
     );
   }
 
   return (
-    <>
-      <Toaster position="top-right" />
+    <div className="min-h-screen bg-[#09090b] text-slate-200 pb-20">
+      <Toaster position="bottom-center" />
 
-      <div className="min-h-screen p-4 md:p-8">
-        <div className="max-w-5xl mx-auto">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-8">
-            {/* ✅ FIXED: Link directly, no nested button */}
-            <Link
-              href="/admin/dashboard"
-              className="flex items-center gap-2 text-white hover:text-purple-300 transition-colors"
+      {/* --- STICKY NAV --- */}
+      <nav className="sticky top-0 z-30 bg-[#09090b]/80 backdrop-blur-xl border-b border-white/5 px-6 py-4">
+        <div className="max-w-6xl mx-auto flex items-center justify-between">
+          <Link href="/admin/dashboard" className="flex items-center gap-2 text-slate-400 hover:text-white transition-all group">
+            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+            <span className="text-sm font-bold">Cancel Editing</span>
+          </Link>
+
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => handleSubmit(formData.published)}
+              disabled={saving}
+              className="px-5 py-2.5 rounded-xl text-sm font-bold text-slate-300 hover:bg-white/5 transition-all disabled:opacity-50 flex items-center gap-2"
             >
-              <ArrowLeft className="w-5 h-5" />
-              Back to Dashboard
-            </Link>
+              <Save className="w-4 h-4" /> Save Changes
+            </button>
+            <button
+              onClick={() => handleSubmit(!formData.published)}
+              disabled={saving}
+              className={`px-6 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all shadow-lg disabled:opacity-50 ${
+                formData.published 
+                ? 'bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 shadow-amber-500/5' 
+                : 'bg-indigo-600 text-white hover:bg-indigo-500 shadow-indigo-600/20'
+              }`}
+            >
+              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : (formData.published ? <EyeOff className="w-4 h-4" /> : <Send className="w-4 h-4" />)}
+              {formData.published ? 'Unpublish Post' : 'Go Live'}
+            </button>
+          </div>
+        </div>
+      </nav>
 
-            <div className="flex gap-3">
-              <button
-                onClick={() => handleSubmit(formData.published)}
-                disabled={saving}
-                className="bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all border border-white/20 disabled:opacity-50"
-              >
-                <Save className="w-5 h-5" />
-                Save Changes
-              </button>
+      <div className="max-w-4xl mx-auto px-6 pt-12">
+        <div className="space-y-12">
+          
+          <section className="space-y-4">
+            <input
+              type="text"
+              value={formData.title}
+              onChange={handleTitleChange}
+              placeholder="Post Title"
+              className="w-full bg-transparent text-5xl md:text-6xl font-black text-white placeholder-white/10 focus:outline-none tracking-tight"
+            />
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-1.5 px-3 py-1 bg-white/5 rounded-lg border border-white/5">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-indigo-400">Path</span>
+                <span className="text-xs font-mono text-slate-400">/blog/{formData.slug}</span>
+              </div>
+            </div>
+          </section>
 
-              <button
-                onClick={() => handleSubmit(!formData.published)}
-                disabled={saving}
-                className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all shadow-lg shadow-purple-500/50 disabled:opacity-50"
+          <hr className="border-white/5" />
+
+          <div className="grid md:grid-cols-2 gap-8">
+            <div className="space-y-3">
+              <label className="text-xs font-bold uppercase tracking-widest text-slate-500">Category</label>
+              <select
+                value={formData.category}
+                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all"
               >
-                {saving ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                ) : (
-                  <Eye className="w-5 h-5" />
-                )}
-                {formData.published ? 'Unpublish' : 'Publish'}
-              </button>
+                <option value="" className="bg-[#0c0c0e]">Uncategorized</option>
+                {categories.map((cat) => (
+                  <option key={cat} value={cat.toLowerCase().replace(/ /g, '-')} className="bg-[#0c0c0e]">{cat}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="space-y-3">
+              <label className="text-xs font-bold uppercase tracking-widest text-slate-500">Search Tags</label>
+              <input
+                type="text"
+                value={formData.tags}
+                onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
+                placeholder="Comma separated..."
+                className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500/20 outline-none"
+              />
             </div>
           </div>
 
-          {/* Form */}
-          <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 border border-white/20 space-y-6">
-            <div>
-              <label className="block text-white font-bold mb-2">Title *</label>
-              <input
-                type="text"
-                value={formData.title}
-                onChange={handleTitleChange}
-                placeholder="Enter your blog post title..."
-                className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 transition-all"
-              />
+          <div className="space-y-3">
+            <div className="flex justify-between">
+              <label className="text-xs font-bold uppercase tracking-widest text-slate-500">Article Summary</label>
+              <span className="text-[10px] font-bold text-slate-600 uppercase">{formData.excerpt.length}/200</span>
             </div>
+            <textarea
+              value={formData.excerpt}
+              onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
+              maxLength={200}
+              rows={2}
+              className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500/20 outline-none resize-none"
+            />
+          </div>
 
-            <div>
-              <label className="block text-white font-bold mb-2">URL Slug</label>
-              <input
-                type="text"
-                value={formData.slug}
-                onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                placeholder="auto-generated-from-title"
-                className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 transition-all"
-              />
-              <p className="text-gray-400 text-sm mt-1">
-                Preview: /blog/{formData.slug || 'your-post-url'}
-              </p>
-            </div>
-
-            <div>
-              <label className="block text-white font-bold mb-2">Excerpt *</label>
-              <textarea
-                value={formData.excerpt}
-                onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
-                placeholder="Brief summary of your post (200 characters max)"
-                maxLength={200}
-                rows={3}
-                className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 transition-all resize-none"
-              />
-              <p className="text-gray-400 text-sm mt-1">{formData.excerpt.length}/200 characters</p>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-white font-bold mb-2">Category</label>
-                <select
-                  value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:outline-none focus:border-purple-500 transition-all"
-                >
-                  <option value="" className="bg-slate-900">Select category...</option>
-                  {categories.map((cat) => (
-                    <option key={cat} value={cat.toLowerCase().replace(/ /g, '-')} className="bg-slate-900">
-                      {cat}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-white font-bold mb-2">Tags</label>
-                <input
-                  type="text"
-                  value={formData.tags}
-                  onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
-                  placeholder="anxiety, therapy, wellness (comma-separated)"
-                  className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 transition-all"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-white font-bold mb-2">
-                Cover Image
-                <span className="text-gray-400 font-normal text-sm ml-2">(max 2MB)</span>
-              </label>
-
-              {formData.cover_image ? (
-                <div className="relative">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={formData.cover_image}
-                    alt="Cover"
-                    className="w-full h-64 object-cover rounded-xl"
-                  />
-                  <button
-                    onClick={() => setFormData({ ...formData, cover_image: '' })}
-                    className="absolute top-4 right-4 p-2 bg-red-500 hover:bg-red-600 rounded-lg text-white transition-all"
-                  >
-                    <X className="w-5 h-5" />
+          <div className="space-y-3">
+            <label className="text-xs font-bold uppercase tracking-widest text-slate-500">Article Media</label>
+            {formData.cover_image ? (
+              <div className="relative group rounded-[2rem] overflow-hidden border border-white/10 aspect-video">
+                <img src={formData.cover_image} alt="Cover" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <button onClick={() => setFormData({ ...formData, cover_image: '' })} className="p-4 bg-red-500 text-white rounded-full shadow-xl hover:scale-110 transition-transform">
+                    <X className="w-6 h-6" />
                   </button>
                 </div>
-              ) : (
-                <label className="block w-full px-4 py-8 bg-white/10 border-2 border-dashed border-white/20 rounded-xl text-center cursor-pointer hover:border-purple-500 transition-all">
-                  <Upload className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                  <p className="text-white mb-1">{imageUploading ? 'Loading image...' : 'Click to upload cover image'}</p>
-                  <p className="text-gray-400 text-sm">PNG, JPG up to 2MB</p>
-                  <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" disabled={imageUploading} />
-                </label>
-              )}
-            </div>
+              </div>
+            ) : (
+              <label className="flex flex-col items-center justify-center w-full aspect-video bg-white/[0.02] border-2 border-dashed border-white/10 rounded-[2rem] cursor-pointer hover:bg-white/[0.04] transition-all group">
+                <div className="p-4 bg-indigo-500/10 rounded-2xl mb-3 group-hover:scale-110 transition-all">
+                  <Upload className="w-6 h-6 text-indigo-400" />
+                </div>
+                <p className="text-sm font-bold text-slate-300">Replace Cover Image</p>
+                <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" disabled={imageUploading} />
+              </label>
+            )}
+          </div>
 
-            <div>
-              <label className="block text-white font-bold mb-2">Content *</label>
+          <div className="space-y-3 pb-10">
+            <label className="text-xs font-bold uppercase tracking-widest text-slate-500 flex items-center gap-2">
+              Post Content <Sparkles className="w-3 h-3 text-indigo-400" />
+            </label>
+            <div className="prose prose-invert max-w-none">
               <RichTextEditor
                 value={formData.content}
                 onChange={(content: string) => setFormData({ ...formData, content })}
               />
             </div>
           </div>
+          
         </div>
       </div>
-    </>
+    </div>
   );
 }
