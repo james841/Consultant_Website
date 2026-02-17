@@ -1,5 +1,8 @@
 'use client';
 
+// ✅ Prevents Next.js from attempting to prerender this page at build time
+export const dynamic = 'force-dynamic';
+
 import React, { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
