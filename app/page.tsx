@@ -1,3 +1,4 @@
+import HomepageBlogSection from "./components/blogSection";
 import CoachSection from "./components/CoachSection";
 import CTASection from "./components/CTASection";
 import EthicsTrustSection from "./components/EthicTrusts";
@@ -19,7 +20,7 @@ export default function Home() {
       <HowItWorksSection/>
       <EthicsTrustSection/>
       <ServicesOverviewSection/>
-      <CTASection/>
+      <HomepageBlogSection/>
       <Footer/>
     </main>
   );

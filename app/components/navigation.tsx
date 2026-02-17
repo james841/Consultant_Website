@@ -22,10 +22,11 @@ export default function Navigation() {
     { href: '/about', label: 'About' },
     { href: '/services', label: 'Services' },
     { href: '/ai-platform', label: 'AI Platform' },
-    { href: '/research', label: 'Research' },
+    { href: '/blog', label: 'blog' },
     { href: '/ethics', label: 'Ethics' },
     { href: '/contact', label: 'Contact' },
   ];
+
 
   return (
     <nav
@@ -37,7 +38,7 @@ export default function Navigation() {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
-          {/* Logo */}
+        
           <Link href="/" className="flex items-center space-x-3 group">
             <motion.div
               initial={{ opacity: 0, x: -20 }}
@@ -53,7 +54,6 @@ export default function Navigation() {
             </span>
           </Link>
 
-          {/* Desktop Menu */}
           <div className="hidden lg:flex items-center space-x-1">
             {navLinks.map((link) => {
               const isActive = pathname === link.href;
@@ -70,7 +70,7 @@ export default function Navigation() {
                 >
                   {link.label}
 
-                  {/* Underline indicator for active/hover */}
+             
                   <span
                     className={`absolute bottom-0 left-1/2 h-0.5 bg-[#00D9FF] transition-all duration-300 rounded-full ${
                       isActive
@@ -96,7 +96,7 @@ export default function Navigation() {
             </Link>
           </div>
 
-          {/* Mobile Hamburger */}
+         
           <motion.button
             whileTap={{ scale: 0.9 }}
             className="lg:hidden w-11 h-11 flex items-center justify-center rounded-xl bg-[#00D9FF]/10 border border-[#00D9FF]/30 hover:bg-[#00D9FF]/20 transition-colors"
@@ -129,7 +129,6 @@ export default function Navigation() {
         </div>
       </div>
 
-      {/* Mobile Menu Dropdown */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div

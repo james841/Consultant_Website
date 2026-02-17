@@ -1,12 +1,10 @@
-import { createServerClient, type CookieOptions } from '@supabase/ssr'
+import { createServerClient } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 export async function middleware(req: NextRequest) {
-  let res = NextResponse.next({
-    request: {
-      headers: req.headers,
-    },
+  let supabaseResponse = NextResponse.next({
+    request: req,
   })
 
   const supabase = createServerClient(
@@ -14,42 +12,17 @@ export async function middleware(req: NextRequest) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        get(name: string) {
-          return req.cookies.get(name)?.value
+        getAll() {
+          return req.cookies.getAll()
         },
-        set(name: string, value: string, options: CookieOptions) {
-          req.cookies.set({
-            name,
-            value,
-            ...options,
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) => req.cookies.set(name, value))
+          supabaseResponse = NextResponse.next({
+            request: req,
           })
-          res = NextResponse.next({
-            request: {
-              headers: req.headers,
-            },
-          })
-          res.cookies.set({
-            name,
-            value,
-            ...options,
-          })
-        },
-        remove(name: string, options: CookieOptions) {
-          req.cookies.set({
-            name,
-            value: '',
-            ...options,
-          })
-          res = NextResponse.next({
-            request: {
-              headers: req.headers,
-            },
-          })
-          res.cookies.set({
-            name,
-            value: '',
-            ...options,
-          })
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseResponse.cookies.set(name, value, options)
+          )
         },
       },
     }
@@ -59,20 +32,26 @@ export async function middleware(req: NextRequest) {
     data: { session },
   } = await supabase.auth.getSession()
 
-  // Protect admin routes
-  if (req.nextUrl.pathname.startsWith('/admin') && !req.nextUrl.pathname.includes('/login')) {
+  // Protect admin routes (except login and callback)
+  if (
+    req.nextUrl.pathname.startsWith('/admin') && 
+    !req.nextUrl.pathname.includes('/login') &&
+    !req.nextUrl.pathname.includes('/auth/callback')
+  ) {
+    // No session - redirect to login
     if (!session) {
       return NextResponse.redirect(new URL('/admin/login', req.url))
     }
 
     // Check if user email matches admin email
     const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL
+    
     if (session.user.email !== adminEmail) {
       return NextResponse.redirect(new URL('/admin/login', req.url))
     }
   }
 
-  return res
+  return supabaseResponse
 }
 
 export const config = {

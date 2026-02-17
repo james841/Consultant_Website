@@ -19,8 +19,61 @@
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+
+
+.ql-editor {
+  font-size: 18px;
+  line-height: 1.8;
+}
+
+.ql-editor h2 {
+  font-size: 2em;
+  font-weight: bold;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+.ql-editor h3 {
+  font-size: 1.5em;
+  font-weight: bold;
+  margin-top: 1.2em;
+  margin-bottom: 0.4em;
+}
+
+.ql-editor p {
+  margin-bottom: 1em;
+}
+
+.ql-editor blockquote {
+  border-left: 4px solid #00D9FF;
+  padding-left: 1rem;
+  margin: 1.5em 0;
+  font-style: italic;
+  color: #4b5563;
+}
+
+.ql-editor a {
+  color: #00D9FF;
+  text-decoration: underline;
+}
+
+.ql-editor ul, .ql-editor ol {
+  padding-left: 1.5em;
+  margin-bottom: 1em;
+}
+
+.ql-editor code {
+  background: #f3f4f6;
+  padding: 0.2em 0.4em;
+  border-radius: 0.25rem;
+  font-size: 0.9em;
+}
+
+.ql-editor pre {
+  background: #1f2937;
+  color: #f3f4f6;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  margin: 1em 0;
 }

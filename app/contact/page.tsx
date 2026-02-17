@@ -53,15 +53,15 @@ export default function ContactPage() {
     {
       icon: Phone,
       label: 'Phone',
-      value: '+775 120 96532',
-      link: 'tel:+77512096532',
+      value: '+44 7512 096532',
+      link: 'tel:+447512096532',
       color: '#FF6B9D',
       description: 'Mon-Fri, 9AM-5PM WAT',
     },
     {
       icon: MessageCircle,
       label: 'WhatsApp',
-      value: '+775 120 96532',
+      value: ' +447512096532',
       link: 'https://wa.me/77512096532',
       color: '#00FF88',
       description: 'Fastest response',

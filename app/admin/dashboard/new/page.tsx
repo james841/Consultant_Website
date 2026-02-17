@@ -1,18 +1,17 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Save, Eye, Upload, X, Loader2 } from 'lucide-react';
+import { ArrowLeft, Save, Eye, Upload, X } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { Toaster } from 'react-hot-toast';
 import RichTextEditor from '@/app/components/RichTextEditor';
 
-export default function EditPost({ params }: { params: { id: string } }) {
+export default function NewPost() {
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [imageUploading, setImageUploading] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -33,41 +32,6 @@ export default function EditPost({ params }: { params: { id: string } }) {
     'Research',
     'Wellness Tips',
   ];
-
-  useEffect(() => {
-    fetchPost();
-  }, [params.id]);
-
-  const fetchPost = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('blog_posts')
-        .select('*')
-        .eq('id', params.id)
-        .single();
-
-      if (error) throw error;
-
-      if (data) {
-        setFormData({
-          title: data.title,
-          slug: data.slug,
-          excerpt: data.excerpt,
-          content: data.content,
-          category: data.category || '',
-          tags: data.tags?.join(', ') || '',
-          cover_image: data.cover_image || '',
-          published: data.published,
-        });
-      }
-    } catch (error) {
-      console.error('Error fetching post:', error);
-      toast.error('Failed to load post');
-      router.push('/admin/dashboard');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const generateSlug = (title: string) => {
     return title
@@ -115,48 +79,48 @@ export default function EditPost({ params }: { params: { id: string } }) {
       return;
     }
 
-    setSaving(true);
+    setLoading(true);
 
     try {
+      // FIXED: Use getUser() instead of getSession() - more secure
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+      if (userError || !user) {
+        toast.error('You must be logged in to create a post');
+        router.push('/admin/login');
+        return;
+      }
+
       const tagsArray = formData.tags
         .split(',')
         .map((tag) => tag.trim())
         .filter(Boolean);
 
-      const { error } = await supabase
-        .from('blog_posts')
-        .update({
-          title: formData.title,
-          slug: formData.slug,
-          excerpt: formData.excerpt,
-          content: formData.content,
-          category: formData.category,
-          tags: tagsArray,
-          cover_image: formData.cover_image,
-          published: publish,
-        })
-        .eq('id', params.id);
+      const { error } = await supabase.from('blog_posts').insert({
+        title: formData.title,
+        slug: formData.slug,
+        excerpt: formData.excerpt,
+        content: formData.content,
+        category: formData.category,
+        tags: tagsArray,
+        cover_image: formData.cover_image,
+        published: publish,
+        author_email: user.email || '',
+      });
 
       if (error) throw error;
 
-      toast.success(publish ? 'Post published!' : 'Changes saved!');
+      toast.success(publish ? 'Post published!' : 'Draft saved!');
+      
       // FIXED: Use router.push directly without setTimeout
       router.push('/admin/dashboard');
     } catch (error) {
-      toast.error('Failed to save changes');
+      toast.error('Failed to save post');
       console.error('Error:', error);
     } finally {
-      setSaving(false);
+      setLoading(false);
     }
   };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="w-12 h-12 text-purple-500 animate-spin" />
-      </div>
-    );
-  }
 
   return (
     <>
@@ -166,34 +130,35 @@ export default function EditPost({ params }: { params: { id: string } }) {
         <div className="max-w-5xl mx-auto">
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
-            <Link href="/admin/dashboard">
-              <button className="flex items-center gap-2 text-white hover:text-purple-300 transition-colors">
-                <ArrowLeft className="w-5 h-5" />
-                Back to Dashboard
-              </button>
+            <Link 
+              href="/admin/dashboard"
+              className="flex items-center gap-2 text-white hover:text-purple-300 transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              Back to Dashboard
             </Link>
 
             <div className="flex gap-3">
               <button
-                onClick={() => handleSubmit(formData.published)}
-                disabled={saving}
+                onClick={() => handleSubmit(false)}
+                disabled={loading}
                 className="bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all border border-white/20 disabled:opacity-50"
               >
                 <Save className="w-5 h-5" />
-                Save Changes
+                Save Draft
               </button>
 
               <button
-                onClick={() => handleSubmit(!formData.published)}
-                disabled={saving}
+                onClick={() => handleSubmit(true)}
+                disabled={loading}
                 className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all shadow-lg shadow-purple-500/50 disabled:opacity-50"
               >
-                {saving ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
+                {loading ? (
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 ) : (
                   <Eye className="w-5 h-5" />
                 )}
-                {formData.published ? 'Unpublish' : 'Publish'}
+                Publish
               </button>
             </div>
           </div>

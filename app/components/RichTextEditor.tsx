@@ -2,7 +2,7 @@
 
 import React from 'react';
 import dynamic from 'next/dynamic';
-import 'react-quill-new/dist/quill.snow.css';  // ← Correct path for react-quill-new
+import 'react-quill-new/dist/quill.snow.css';
 
 const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false });
 
@@ -29,8 +29,7 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
     'italic',
     'underline',
     'strike',
-    'list',
-    'bullet',
+    'list',       // FIXED: 'bullet' removed, only 'list' is needed for both ordered and bullet lists
     'blockquote',
     'code-block',
     'link',
@@ -47,32 +46,33 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
         placeholder="Write your blog post content here..."
         className="bg-white rounded-xl"
       />
-      
+
       <style jsx global>{`
         .rich-text-editor .quill {
           background: white;
           border-radius: 12px;
           overflow: hidden;
         }
-        
+
         .rich-text-editor .ql-toolbar {
           background: #f8fafc;
           border: none;
           border-bottom: 2px solid #e2e8f0;
           border-radius: 12px 12px 0 0;
         }
-        
+
         .rich-text-editor .ql-container {
           border: none;
           min-height: 400px;
           font-size: 16px;
           font-family: inherit;
         }
-        
+
         .rich-text-editor .ql-editor {
           padding: 20px;
+          min-height: 400px;
         }
-        
+
         .rich-text-editor .ql-editor.ql-blank::before {
           color: #94a3b8;
           font-style: normal;

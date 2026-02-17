@@ -221,19 +221,19 @@ export default function Footer() {
                 </div>
                 <div>
                   <p className="text-xs text-gray-500 mb-0.5">Call us</p>
-                  <a href="tel:+77512096532" className="hover:text-white transition-colors text-sm">
-                     +77512096532
+                  <a href="tel:+447512096532" className="hover:text-white transition-colors text-sm">
+                     +447512096532
                   </a>
                 </div>
               </li>
               
               <li className="flex items-start gap-3 text-gray-400 group">
-                <div className="w-9 h-9 rounded-lg bg-[#00FF88]/10 border border-[#00FF88]/20 flex items-center justify-center flex-shrink-0">
+                <div className="w-9 h-9 rounded-lg bg-[#00FF88]/10 border border-[#00FF88]/20 flex items-center justify-center flex-shrink-0 group-hover:bg-[#00FF88]/20 transition-colors">
                   <MapPin className="w-4 h-4 text-[#00FF88]" />
                 </div>
                 <div>
                   <p className="text-xs text-gray-500 mb-0.5">Location</p>
-                  <span className="text-sm">Nigeria</span>
+                  <span className="text-sm">United Kingdom</span>
                 </div>
               </li>
             </ul>
