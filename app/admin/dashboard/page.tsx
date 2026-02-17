@@ -16,7 +16,21 @@ import {
   Calendar,
 } from 'lucide-react';
 import Link from 'next/link';
-import type { BlogPost } from '@/lib/supabase';
+
+// ✅ Defined inline — avoids importing from @/lib/supabase which crashes at build time
+type BlogPost = {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  category: string;
+  tags: string[];
+  cover_image: string;
+  published: boolean;
+  author_email: string;
+  created_at: string;
+};
 
 // ✅ Use createClient directly — avoids SSR crash during Vercel build
 const supabase = createClient(
