@@ -7,7 +7,22 @@ import { ArrowLeft, Save, Eye, Upload, X } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { Toaster } from 'react-hot-toast';
-import RichTextEditor from '@/app/components/RichTextEditor';
+import dynamic from 'next/dynamic';
+
+// ✅ Dynamically import RichTextEditor with SSR disabled.
+// Rich text editors rely on browser APIs (document, window) that
+// don't exist at build time — this prevents the Vercel build crash.
+const RichTextEditor = dynamic(
+  () => import('@/app/components/RichTextEditor'),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-64 bg-white/10 border border-white/20 rounded-xl animate-pulse flex items-center justify-center">
+        <p className="text-gray-400 text-sm">Loading editor...</p>
+      </div>
+    ),
+  }
+);
 
 export default function NewPost() {
   const router = useRouter();
@@ -82,7 +97,6 @@ export default function NewPost() {
     setLoading(true);
 
     try {
-      // FIXED: Use getUser() instead of getSession() - more secure
       const { data: { user }, error: userError } = await supabase.auth.getUser();
 
       if (userError || !user) {
@@ -111,8 +125,6 @@ export default function NewPost() {
       if (error) throw error;
 
       toast.success(publish ? 'Post published!' : 'Draft saved!');
-      
-      // FIXED: Use router.push directly without setTimeout
       router.push('/admin/dashboard');
     } catch (error) {
       toast.error('Failed to save post');
@@ -130,7 +142,7 @@ export default function NewPost() {
         <div className="max-w-5xl mx-auto">
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
-            <Link 
+            <Link
               href="/admin/dashboard"
               className="flex items-center gap-2 text-white hover:text-purple-300 transition-colors"
             >
@@ -247,6 +259,7 @@ export default function NewPost() {
 
               {formData.cover_image ? (
                 <div className="relative">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={formData.cover_image}
                     alt="Cover"
