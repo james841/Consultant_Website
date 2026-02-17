@@ -1,17 +1,22 @@
 'use client';
 
 import React, { useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Save, Eye, Upload, X } from 'lucide-react';
 import Link from 'next/link';
-import toast from 'react-hot-toast';
-import { Toaster } from 'react-hot-toast';
+import toast, { Toaster } from 'react-hot-toast';
 import dynamic from 'next/dynamic';
 
-// ✅ Dynamically import RichTextEditor with SSR disabled.
-// Rich text editors rely on browser APIs (document, window) that
-// don't exist at build time — this prevents the Vercel build crash.
+// ✅ Plain supabase-js createClient — safe for both server and client.
+// Do NOT import from @/lib/supabase here — createBrowserClient crashes
+// during Next.js build when the module graph is evaluated server-side.
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
+
+// ✅ SSR disabled — rich text editors use browser APIs unavailable at build time.
 const RichTextEditor = dynamic(
   () => import('@/app/components/RichTextEditor'),
   {
