@@ -1,7 +1,7 @@
 import React from 'react';
 import { ArrowLeft, Share2, Clock, ChevronRight, Bookmark } from 'lucide-react';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase-server';
 import { notFound } from 'next/navigation';
 import Navigation from '@/app/components/navigation';
 import Footer from '@/app/components/Footer';
@@ -13,6 +13,8 @@ interface BlogPostPageProps {
 }
 
 async function getPost(slug: string) {
+  const supabase = await createClient();
+
   const { data, error } = await supabase
     .from('blog_posts')
     .select('*')
@@ -90,10 +92,11 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           </div>
         </header>
 
-        {/* Cover Image - regular img tag */}
+        {/* Cover Image */}
         {post.cover_image && (
           <div className="max-w-6xl mx-auto px-4 mb-20">
             <div className="rounded-[2.5rem] overflow-hidden shadow-2xl ring-1 ring-black/5">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={post.cover_image}
                 alt={post.title}
@@ -105,11 +108,8 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
         {/* Content Layout */}
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-[1fr_minmax(auto,72ch)_1fr] gap-12">
-
-          {/* Left: Empty spacer */}
           <aside className="hidden lg:block" />
 
-          {/* Center: Readable content */}
           <div
             className="
               w-full max-w-none text-left
@@ -142,7 +142,6 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             dangerouslySetInnerHTML={{ __html: post.content }}
           />
 
-          {/* Right: Author Sidebar */}
           <aside className="hidden lg:block sticky top-40 h-fit">
             <div className="p-8 bg-gray-50 rounded-[2rem] border border-gray-100">
               <h4 className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 mb-6">About The Author</h4>
@@ -166,13 +165,12 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           <div className="absolute top-[-10%] right-[-10%] w-96 h-96 bg-[#00D9FF] rounded-full blur-[120px]" />
           <div className="absolute bottom-[-10%] left-[-10%] w-96 h-96 bg-[#FF6B9D] rounded-full blur-[120px]" />
         </div>
-
         <div className="max-w-3xl mx-auto px-6 text-center relative z-10">
           <h2 className="text-3xl md:text-5xl font-serif font-bold text-white mb-6">
             Did this spark a thought?
           </h2>
           <p className="text-gray-300 text-lg mb-12">
-            I would love to hear your perspective on this topic. Let is start a conversation.
+            I would love to hear your perspective on this topic. Let us start a conversation.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link href="/contact" className="bg-[#00D9FF] hover:bg-[#00B8D9] text-[#0A3D4A] px-10 py-4 rounded-2xl font-bold transition-all hover:scale-105 shadow-xl shadow-[#00D9FF]/20">
