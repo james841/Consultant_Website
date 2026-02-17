@@ -1,6 +1,10 @@
 'use client';
 
+// ✅ Prevents prerendering at build time
+export const dynamic = 'force-dynamic';
+
 import React, { useState, useEffect } from 'react';
+import { createClient } from '@supabase/supabase-js';
 import { motion } from 'framer-motion';
 import {
   Calendar,
@@ -11,10 +15,27 @@ import {
   Sparkles,
 } from 'lucide-react';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabase';
-import type { BlogPost } from '@/lib/supabase';
-import Navigation from '../components/navigation';
-import Footer from '../components/Footer';
+
+// ✅ Direct createClient — avoids SSR crash during Vercel build
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
+
+// ✅ Defined inline — avoids importing from @/lib/supabase
+type BlogPost = {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  category: string;
+  tags: string[];
+  cover_image: string;
+  published: boolean;
+  author_email: string;
+  created_at: string;
+};
 
 export default function BlogPage() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
@@ -79,7 +100,6 @@ export default function BlogPage() {
 
   return (
     <main className="min-h-screen bg-white">
-      <Navigation/>
       {/* Hero */}
       <section className="pt-32 pb-20 px-4 bg-[#0A3D4A] relative overflow-hidden">
         <div className="absolute top-20 right-20 w-96 h-96 bg-[#00D9FF] opacity-10 rounded-full blur-3xl"></div>
@@ -268,7 +288,6 @@ export default function BlogPage() {
           </div>
         </motion.div>
       </section>
-      <Footer/>
     </main>
   );
 }
