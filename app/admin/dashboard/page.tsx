@@ -15,7 +15,6 @@ import {
   Plus,
   FileText,
   TrendingUp,
-  Calendar,
   LayoutDashboard,
   Settings,
   Search,
@@ -42,18 +41,11 @@ export default function AdminDashboard() {
   const router = useRouter();
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
-  const [userEmail, setUserEmail] = useState('');
   const [stats, setStats] = useState({ total: 0, published: 0, drafts: 0 });
 
   useEffect(() => {
-    checkAuth();
     fetchPosts();
   }, []);
-
-  const checkAuth = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user?.email) setUserEmail(user.email);
-  };
 
   const fetchPosts = async () => {
     try {
@@ -76,8 +68,9 @@ export default function AdminDashboard() {
     }
   };
 
+  // ✅ Updated: uses JWT cookie logout instead of Supabase auth
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
+    await fetch('/api/admin/logout', { method: 'POST' });
     router.push('/admin/login');
   };
 
@@ -105,7 +98,10 @@ export default function AdminDashboard() {
         </nav>
 
         <div className="mt-auto pt-6 border-t border-white/5">
-          <button onClick={handleSignOut} className="flex items-center gap-3 px-3 py-2 w-full text-slate-400 hover:text-red-400 transition-colors">
+          <button
+            onClick={handleSignOut}
+            className="flex items-center gap-3 px-3 py-2 w-full text-slate-400 hover:text-red-400 transition-colors"
+          >
             <LogOut className="w-5 h-5" /> Sign Out
           </button>
         </div>
@@ -117,16 +113,18 @@ export default function AdminDashboard() {
         <header className="h-16 border-b border-white/5 bg-[#09090b]/50 backdrop-blur-md flex items-center justify-between px-8 sticky top-0 z-10">
           <div className="relative w-full max-w-md hidden sm:block">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-            <input 
-              type="text" 
-              placeholder="Search posts..." 
+            <input
+              type="text"
+              placeholder="Search posts..."
               className="w-full bg-white/5 border border-white/10 rounded-full py-1.5 pl-10 pr-4 text-sm focus:outline-none focus:border-indigo-500/50 transition-all"
             />
           </div>
+
+          {/* ✅ Updated: shows static "Admin" label instead of Supabase user email */}
           <div className="flex items-center gap-4">
             <div className="text-right hidden sm:block">
-              <p className="text-sm font-medium text-white">{userEmail.split('@')[0]}</p>
-              <p className="text-xs text-slate-500">{userEmail}</p>
+              <p className="text-sm font-medium text-white">Admin</p>
+              <p className="text-xs text-slate-500">Administrator</p>
             </div>
             <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 border border-white/10" />
           </div>
@@ -170,12 +168,16 @@ export default function AdminDashboard() {
           <section className="bg-[#121214] border border-white/5 rounded-xl overflow-hidden">
             <div className="p-6 border-b border-white/5 flex items-center justify-between">
               <h2 className="font-bold text-lg text-white">Recent Posts</h2>
-              <button className="text-slate-500 hover:text-white transition-colors"><MoreVertical className="w-5 h-5"/></button>
+              <button className="text-slate-500 hover:text-white transition-colors">
+                <MoreVertical className="w-5 h-5" />
+              </button>
             </div>
 
             <div className="overflow-x-auto">
               {loading ? (
-                <div className="p-20 flex justify-center"><div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" /></div>
+                <div className="p-20 flex justify-center">
+                  <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+                </div>
               ) : (
                 <table className="w-full text-left">
                   <thead>
@@ -190,7 +192,7 @@ export default function AdminDashboard() {
                   <tbody className="divide-y divide-white/5">
                     <AnimatePresence>
                       {posts.map((post) => (
-                        <motion.tr 
+                        <motion.tr
                           layout
                           key={post.id}
                           initial={{ opacity: 0 }}
@@ -205,8 +207,8 @@ export default function AdminDashboard() {
                           </td>
                           <td className="px-6 py-4">
                             <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium border ${
-                              post.published 
-                                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
+                              post.published
+                                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
                                 : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
                             }`}>
                               <span className={`w-1.5 h-1.5 rounded-full ${post.published ? 'bg-emerald-400' : 'bg-amber-400'}`} />
@@ -229,7 +231,10 @@ export default function AdminDashboard() {
                               <Link href={`/admin/dashboard/edit/${post.id}`} className="p-2 hover:bg-indigo-500/20 rounded-lg text-slate-400 hover:text-indigo-400 transition-all">
                                 <Edit className="w-4 h-4" />
                               </Link>
-                              <button onClick={() => {/* delete logic */}} className="p-2 hover:bg-red-500/20 rounded-lg text-slate-400 hover:text-red-400 transition-all">
+                              <button
+                                onClick={() => {/* delete logic */}}
+                                className="p-2 hover:bg-red-500/20 rounded-lg text-slate-400 hover:text-red-400 transition-all"
+                              >
                                 <Trash2 className="w-4 h-4" />
                               </button>
                             </div>

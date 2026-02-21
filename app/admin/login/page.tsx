@@ -1,135 +1,135 @@
 'use client';
 
-// ✅ Prevents prerendering at build time
 export const dynamic = 'force-dynamic';
 
-import React, { useEffect, useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
-import { useRouter, useSearchParams } from 'next/navigation';
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Shield, Mail, AlertCircle } from 'lucide-react';
-
-// ✅ Direct createClient — avoids SSR crash during Vercel build
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+import { Shield, AlertCircle, Loader2, Eye, EyeOff } from 'lucide-react';
 
 export default function AdminLogin() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [form, setForm] = useState({ username: '', password: '' });
 
-  useEffect(() => {
-    // ✅ FIXED: Use getUser() instead of getSession()
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user?.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL) {
-        router.push('/admin/dashboard');
-      }
-    });
-
-    // Check for error params from callback
-    const errorParam = searchParams.get('error');
-    if (errorParam) {
-      switch (errorParam) {
-        case 'auth_failed':
-          setError('Authentication failed. Please try again.');
-          break;
-        case 'unauthorized':
-          setError('Only the authorized admin email can access this dashboard.');
-          break;
-        case 'server_error':
-          setError('Server error occurred. Please try again.');
-          break;
-        case 'no_code':
-          setError('No authorization code received. Please try again.');
-          break;
-        default:
-          setError('An error occurred. Please try again.');
-      }
-    }
-  }, [router, searchParams]);
-
-  const handleGoogleLogin = async () => {
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
     setLoading(true);
     setError('');
 
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
-          queryParams: {
-            access_type: 'offline',
-            prompt: 'consent',
-          },
-        },
+      const res = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
       });
 
-      if (error) throw error;
-    } catch (error) {
-      setError(error instanceof Error ? error.message : 'An error occurred');
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || 'Login failed');
+        return;
+      }
+
+      router.push('/admin/dashboard');
+    } catch {
+      setError('An unexpected error occurred');
+    } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
+    <div className="min-h-screen bg-[#09090b] flex items-center justify-center px-4 overflow-hidden relative">
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-600/10 blur-[120px] rounded-full" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-violet-600/10 blur-[120px] rounded-full" />
+
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="max-w-md w-full"
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="max-w-md w-full relative z-10"
       >
-        {/* Logo/Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl mb-4 shadow-2xl shadow-purple-500/50">
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-tr from-indigo-600 to-violet-500 rounded-3xl mb-6 shadow-2xl shadow-indigo-500/20">
             <Shield className="w-10 h-10 text-white" />
           </div>
-          <h1 className="text-4xl font-bold text-white mb-2">Admin Portal</h1>
-          <p className="text-gray-400">Blog Management</p>
+          <h1 className="text-4xl font-black text-white tracking-tight mb-2">Scribe Admin</h1>
+          <p className="text-slate-500 font-medium">Internal Management Systems</p>
         </div>
 
-        {/* Login Card */}
-        <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 border border-white/20 shadow-2xl">
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold text-white mb-2">Welcome Back</h2>
-            <p className="text-gray-300">Sign in with your authorized Google account</p>
+        <div className="bg-[#121214] border border-white/5 rounded-[2.5rem] p-10 shadow-3xl">
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-white mb-2">Sign In</h2>
+            <p className="text-slate-400 text-sm leading-relaxed">
+              Enter your administrator credentials to access the dashboard.
+            </p>
           </div>
 
           {error && (
-            <div className="mb-6 p-4 bg-red-500/20 border border-red-500/50 rounded-xl flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
-              <p className="text-red-200 text-sm">{error}</p>
-            </div>
+            <motion.div
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl flex items-start gap-3"
+            >
+              <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+              <p className="text-red-200/80 text-xs font-medium leading-tight">{error}</p>
+            </motion.div>
           )}
 
-          <button
-            onClick={handleGoogleLogin}
-            disabled={loading}
-            className="w-full bg-white hover:bg-gray-100 text-gray-900 font-bold py-4 px-6 rounded-xl transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? (
-              <div className="w-6 h-6 border-2 border-gray-900 border-t-transparent rounded-full animate-spin" />
-            ) : (
-              <>
-                <Mail className="w-5 h-5" />
-                Sign in with Google
-              </>
-            )}
-          </button>
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-xs font-bold uppercase tracking-widest text-slate-500">Username</label>
+              <input
+                type="text"
+                value={form.username}
+                onChange={(e) => setForm({ ...form, username: e.target.value })}
+                placeholder="Enter username"
+                required
+                autoComplete="username"
+                className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:outline-none transition-all"
+              />
+            </div>
 
-          <div className="mt-6 p-4 bg-yellow-500/20 border border-yellow-500/50 rounded-xl">
-            <p className="text-yellow-200 text-sm">
-              <strong>Note:</strong> Only the authorized admin email can access this dashboard.
-            </p>
+            <div className="space-y-2">
+              <label className="text-xs font-bold uppercase tracking-widest text-slate-500">Password</label>
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={form.password}
+                  onChange={(e) => setForm({ ...form, password: e.target.value })}
+                  placeholder="Enter password"
+                  required
+                  autoComplete="current-password"
+                  className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-4 py-3 pr-12 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:outline-none transition-all"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors"
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-black py-4 px-6 rounded-2xl transition-all duration-300 flex items-center justify-center gap-3 disabled:opacity-50 mt-2"
+            >
+              {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Access Dashboard'}
+            </button>
+          </form>
+
+          <div className="mt-8 pt-8 border-t border-white/5">
+            <div className="flex items-center gap-3 text-amber-500/80">
+              <Shield className="w-4 h-4" />
+              <span className="text-[10px] font-bold uppercase tracking-widest">Admin Access Only</span>
+            </div>
           </div>
         </div>
-
-        <p className="text-center text-gray-500 text-sm mt-8">
-          Protected by Google OAuth 2.0
-        </p>
       </motion.div>
     </div>
   );
