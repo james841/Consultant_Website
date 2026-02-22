@@ -62,7 +62,7 @@ export default function ContactPage() {
       icon: MessageCircle,
       label: 'WhatsApp',
       value: ' +447512096532',
-      link: 'https://wa.me/77512096532',
+      link: 'https://wa.me/447512096532',
       color: '#00FF88',
       description: 'Fastest response',
     },

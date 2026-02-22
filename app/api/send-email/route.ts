@@ -10,8 +10,8 @@ export async function POST(request: Request) {
 
     // Email to the client (owner of the website)
     const { data, error } = await resend.emails.send({
-      from: 'Sentinel Mind <onboarding@resend.dev>', // Update with your domain
-      to: ['afolayanshem@gmail.com'], // Client's email
+      from: 'Sentinel Mind <https://www.infosentinelmind.co.uk>', // Update with your domain
+      to: ['abigailajayi998@gmail.com'], // Client's email
       subject: type === 'booking' 
         ? `New Consultation Booking from ${name}` 
         : `New Contact Inquiry from ${name}`,
@@ -45,7 +45,7 @@ export async function POST(request: Request) {
 
     // Auto-response to the person who submitted
     await resend.emails.send({
-      from: 'Sentinel Mind <onboarding@resend.dev>',
+      from: 'Sentinel Mind <https://www.infosentinelmind.co.uk>',
       to: [email],
       subject: 'Thank you for reaching out to Sentinel Mind',
       html: `
@@ -66,8 +66,8 @@ export async function POST(request: Request) {
           </div>
           
           <p style="color: #2F3E46;">
-            In the meantime, feel free to explore our <a href="https://yourwebsite.com/blog" style="color: #00D9FF;">blog</a> 
-            and <a href="https://yourwebsite.com/resources" style="color: #00D9FF;">resources</a>.
+            In the meantime, feel free to explore our <a href="https://www.infosentinelmind.co.uk/blog" style="color: #00D9FF;">blog</a> 
+            and <a href="https://www.infosentinelmind.co.uk/resources" style="color: #00D9FF;">resources</a>.
           </p>
           
           <p style="margin-top: 30px;">
