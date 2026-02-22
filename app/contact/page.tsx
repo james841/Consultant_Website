@@ -69,7 +69,7 @@ export default function ContactPage() {
     {
       icon: MapPin,
       label: 'Location',
-      value: 'Nigeria',
+      value: 'United Kingdom',
       link: null,
       color: '#FFC700',
       description: 'Available virtually worldwide',
