@@ -1,21 +1,31 @@
 'use client';
 
 import React from 'react';
-import { Shield, Users, Brain, Award, Heart, Lock, Eye } from 'lucide-react';
+import { Shield, Users, Brain, Award, Heart, Lock, Eye, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-const cardVariants = {
-  hidden: { opacity: 0, scale: 0.92, y: 20 },
-  visible: (i: number) => ({
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
     opacity: 1,
-    scale: 1,
-    y: 0,
     transition: {
-      delay: i * 0.12,
-      duration: 0.6,
-      ease: [0.34, 1.56, 0.64, 1] as const, // ← this fixes the TS error
+      staggerChildren: 0.15,
+      delayChildren: 0.3,
     },
-  }),
+  },
+};
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 30, scale: 0.95 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      duration: 0.8,
+      ease: 'easeOut', // use a supported string value
+    },
+  },
 };
 
 export default function EthicsTrustSection() {
@@ -59,103 +69,140 @@ export default function EthicsTrustSection() {
   ];
 
   return (
-    <section 
-      className="py-20 md:py-24 px-4 md:px-6 relative overflow-hidden bg-cover bg-center bg-no-repeat"
-      style={{
-        backgroundImage: `url('https://thumbs.dreamstime.com/b/glowing-blue-shield-padlock-icon-signifies-digital-security-data-protection-illustrates-internet-safety-cyber-defense-network-393787346.jpg')`,
-      }}
-    >
-      {/* Darker overlay tuned for this new image – keeps text crisp */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/60 to-black/75"></div>
-      
-      {/* Reduced-opacity orbs to complement the new background */}
-      <div className="absolute top-20 left-10 md:left-20 w-80 md:w-96 h-80 md:h-96 bg-[#00D9FF] opacity-6 rounded-full blur-3xl animate-pulse"></div>
-      <div className="absolute bottom-20 right-10 md:right-20 w-64 md:w-72 h-64 md:h-72 bg-[#FF6B9D] opacity-6 rounded-full blur-3xl animate-pulse"></div>
+    <section className="relative py-24 md:py-32 px-4 md:px-6 overflow-hidden bg-[#030712]">
+      {/* Dynamic Animated Background Mesh */}
+      <div className="absolute inset-0 z-0">
+        <motion.div 
+          animate={{ 
+            scale: [1, 1.2, 1],
+            opacity: [0.15, 0.25, 0.15] 
+          }}
+          transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+          className="absolute -top-[10%] -left-[10%] w-[50%] h-[50%] bg-[#00D9FF] rounded-full blur-[120px]"
+        />
+        <motion.div 
+          animate={{ 
+            scale: [1, 1.3, 1],
+            opacity: [0.1, 0.2, 0.1] 
+          }}
+          transition={{ duration: 15, repeat: Infinity, ease: "linear", delay: 2 }}
+          className="absolute top-[20%] -right-[10%] w-[40%] h-[60%] bg-[#9D4EDD] rounded-full blur-[120px]"
+        />
+      </div>
+
+      {/* Texture Overlay (Your requested image with low opacity for elegance) */}
+      <div 
+        className="absolute inset-0 z-[1] opacity-10 mix-blend-overlay pointer-events-none"
+        style={{
+          backgroundImage: `url('https://thumbs.dreamstime.com/b/glowing-blue-shield-padlock-icon-signifies-digital-security-data-protection-illustrates-internet-safety-cyber-defense-network-393787346.jpg')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center'
+        }}
+      />
 
       <div className="max-w-7xl mx-auto relative z-10">
-        {/* Header – slight polish */}
+        {/* Header Section */}
+        <div className="text-center mb-20">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-[#00D9FF] text-sm font-bold tracking-widest uppercase mb-6 backdrop-blur-md"
+          >
+            <Lock className="w-4 h-4" />
+            Integrity by Design
+          </motion.div>
+
+          <motion.h2 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-5xl md:text-7xl font-bold text-white mb-8 tracking-tight"
+          >
+            Ethics, Privacy <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00D9FF] to-[#9D4EDD]">&</span> Trust
+          </motion.h2>
+          
+          <motion.p 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed"
+          >
+            We believe technology should serve humanity, not exploit it. 
+            Your safety is our architectural foundation.
+          </motion.p>
+        </div>
+
+        {/* Principles Grid */}
+        <motion.div 
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-50px" }}
+          className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8"
+        >
+          {principles.map((item, idx) => (
+            <motion.div
+              key={idx}
+              variants={cardVariants}
+              whileHover={{ y: -8, transition: { duration: 0.3 } }}
+              className="group relative p-8 rounded-3xl bg-white/[0.03] border border-white/10 hover:border-white/20 transition-colors overflow-hidden"
+            >
+              {/* Hover Glow Effect */}
+              <div 
+                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+                style={{
+                  background: `radial-gradient(circle at top right, ${item.color}20, transparent 70%)`
+                }}
+              />
+
+              <div 
+                className="w-14 h-14 rounded-2xl flex items-center justify-center mb-8 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-[5deg]"
+                style={{ backgroundColor: `${item.color}15`, color: item.color }}
+              >
+                <item.icon className="w-7 h-7" />
+              </div>
+
+              <h3 className="text-2xl font-bold text-white mb-4">
+                {item.title}
+              </h3>
+              
+              <p className="text-gray-400 leading-relaxed group-hover:text-gray-300 transition-colors">
+                {item.desc}
+              </p>
+              
+              {/* Subtle accent line */}
+              <div 
+                className="absolute bottom-0 left-0 h-[2px] w-0 group-hover:w-full transition-all duration-500"
+                style={{ backgroundColor: item.color }}
+              />
+            </motion.div>
+          ))}
+        </motion.div>
+
+        {/* Enhanced CTA */}
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.7 }}
-          className="text-center mb-16 md:mb-20"
+          transition={{ delay: 0.5 }}
+          className="mt-24 text-center"
         >
-          <div className="inline-flex items-center gap-3 bg-gradient-to-r from-[#FF6B9D] to-[#FF4D85] text-white px-6 py-3 rounded-full mb-8 font-bold shadow-xl shadow-[#FF6B9D]/40">
-            <Lock className="w-5 h-5" />
-            MY ETHICAL FOUNDATION
-          </div>
-
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white mb-6 tracking-tight">
-            Ethics, Privacy {'&'} {' '}
-            <span className="text-[#00D9FF]">Trust</span>
-          </h2>
-          <p className="text-lg md:text-xl lg:text-2xl text-gray-200 max-w-3xl mx-auto font-light">
-            Your wellbeing, dignity, and data sovereignty come first — always.
+          <motion.a
+            href="/ethics"
+            className="inline-flex items-center gap-4 bg-white text-black px-10 py-5 rounded-full font-bold text-lg hover:bg-[#00D9FF] hover:text-black transition-all duration-300 group shadow-2xl shadow-white/5"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            Read Our Full Ethics Framework
+            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+          </motion.a>
+          
+          <p className="mt-6 text-gray-500 text-sm font-medium uppercase tracking-widest">
+            Last Updated: February 2026
           </p>
-        </motion.div>
-
-        {/* Grid – same improved styling from before */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 lg:gap-10">
-          {principles.map((item, idx) => (
-            <motion.div
-              key={idx}
-              custom={idx}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, margin: "-80px" }}
-              variants={cardVariants}
-              whileHover={{ y: -10, scale: 1.04 }}
-              className="bg-white/8 backdrop-blur-md rounded-3xl p-7 md:p-8 border border-white/10 hover:border-white/20 transition-all duration-400 group relative overflow-hidden shadow-xl shadow-black/30"
-              style={{ 
-                borderColor: `${item.color}30`,
-                background: `linear-gradient(135deg, rgba(255,255,255,0.03), rgba(10,61,74,0.4))`
-              }}
-            >
-              <div 
-                className="absolute -top-20 -right-20 w-64 h-64 rounded-full blur-3xl opacity-0 group-hover:opacity-25 transition-opacity duration-500"
-                style={{ backgroundColor: item.color }}
-              />
-
-              <motion.div
-                whileHover={{ scale: 1.15, rotate: 8 }}
-                transition={{ duration: 0.4 }}
-                className="w-16 h-16 md:w-18 md:h-18 rounded-2xl flex items-center justify-center mb-6 relative z-10 shadow-2xl group-hover:shadow-[0_20px_50px_rgba(0,0,0,0.4)] transition-all"
-                style={{ 
-                  background: `linear-gradient(135deg, ${item.color}, ${item.color}CC)`,
-                }}
-              >
-                <item.icon className="w-8 h-8 md:w-9 md:h-9 text-white drop-shadow-md" />
-              </motion.div>
-
-              <h3 className="text-xl md:text-2xl font-bold text-white mb-4 group-hover:text-[#00D9FF] transition-colors">
-                {item.title}
-              </h3>
-              <p className="text-gray-200 leading-relaxed text-base md:text-lg">
-                {item.desc}
-              </p>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* CTA */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.7, duration: 0.7 }}
-          className="text-center mt-16 md:mt-20"
-        >
-          <a href="/ethics" className="block cursor-pointer mx-auto w-max">
-            <motion.button
-              whileHover={{ scale: 1.06, y: -3 }}
-              whileTap={{ scale: 0.97 }}
-              className="bg-gradient-to-r from-[#FF6B9D] to-[#FF4D85] text-white px-10 py-5 rounded-2xl font-bold text-lg shadow-2xl shadow-[#FF6B9D]/50 hover:shadow-[#FF6B9D]/70 transition-all duration-300 flex items-center gap-3 mx-auto"
-            >
-              Read Our Full Ethics Framework
-              <Shield className="w-5 h-5" />
-            </motion.button>
-          </a>
         </motion.div>
       </div>
     </section>

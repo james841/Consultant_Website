@@ -55,7 +55,7 @@ export default function AdminLogin() {
           <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-tr from-indigo-600 to-violet-500 rounded-3xl mb-6 shadow-2xl shadow-indigo-500/20">
             <Shield className="w-10 h-10 text-white" />
           </div>
-          <h1 className="text-4xl font-black text-white tracking-tight mb-2">Scribe Admin</h1>
+          <h1 className="text-4xl font-black text-white tracking-tight mb-2">SentinelMind Admin</h1>
           <p className="text-slate-500 font-medium">Internal Management Systems</p>
         </div>
 
