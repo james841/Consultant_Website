@@ -23,11 +23,10 @@ const cardVariants = {
     scale: 1,
     transition: {
       duration: 0.8,
-      ease: 'easeOut', // use a supported string value
+      ease: [0.25, 0.1, 0.25, 1] as const, // cubic-bezier equivalent of 'easeOut'
     },
   },
 };
-
 export default function EthicsTrustSection() {
   const principles = [
     { 
