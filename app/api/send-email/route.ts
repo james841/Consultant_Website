@@ -10,8 +10,8 @@ export async function POST(request: Request) {
 
     // Email to the client (owner of the website)
     const { data, error } = await resend.emails.send({
-      from: 'Sentinel Mind <https://www.infosentinelmind.co.uk>', // Update with your domain
-      to: ['abigailajayi998@gmail.com'], // Client's email
+      from: 'Sentinel Mind <onboarding@resend.dev>',
+      to: ['abigailajayi998@gmail.co'],
       subject: type === 'booking' 
         ? `New Consultation Booking from ${name}` 
         : `New Contact Inquiry from ${name}`,
@@ -45,7 +45,7 @@ export async function POST(request: Request) {
 
     // Auto-response to the person who submitted
     await resend.emails.send({
-      from: 'Sentinel Mind <https://www.infosentinelmind.co.uk>',
+      from: 'Sentinel Mind <onboarding@resend.dev>',
       to: [email],
       subject: 'Thank you for reaching out to Sentinel Mind',
       html: `

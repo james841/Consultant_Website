@@ -63,7 +63,7 @@ export default function HeroSection() {
 
           {/* Main Heading */}
           <motion.h1 variants={fadeInUp} className="text-5xl sm:text-6xl md:text-7xl font-serif text-white leading-[1.1] tracking-tight">
-            You dont have to navigate this{" "}
+            You don&apos;t have to navigate this{" "}
             <span className="relative inline-block">
               alone
               <svg className="absolute -bottom-2 left-0 w-full" height="12" viewBox="0 0 200 12" fill="none">
