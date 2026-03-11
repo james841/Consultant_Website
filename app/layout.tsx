@@ -15,7 +15,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'MindCare - AI-Driven Mental Health Platform',
+  title: 'SentinelMind - AI-Driven Mental Health Platform',
   description: 'Ethical AI-powered mental health platform for communities',
   icons: '/logosen.png',
 };
